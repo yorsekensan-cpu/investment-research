@@ -4,7 +4,7 @@ import requests
 import plotly.graph_objects as go
 
 st.set_page_config(page_title="BTC Analytics", layout="wide")
-st.title("Bitcoin Macro Investment Dashboard")
+st.title("Bitcoin Investment Dashboard")
 
 @st.cache_data(ttl=3600)
 def get_data():
@@ -13,7 +13,7 @@ def get_data():
         "assets": "btc",
         "metrics": "PriceUSD,CapMVRVCur",
         "frequency": "1d",
-        "limit_per_asset": 1825
+        "limit_per_asset": 365
     }
     res = requests.get(url, params=params, headers={"User-Agent": "Mozilla/5.0"}).json()
     df = pd.DataFrame(res['data'])
@@ -37,13 +37,13 @@ with col1:
     fig1 = go.Figure()
     fig1.add_trace(go.Scatter(x=df['date'], y=df['close'], name='BTC Price', line=dict(color='#2962FF')))
     fig1.add_trace(go.Scatter(x=df['date'], y=df['MA200'], name='200 MA', line=dict(color='#FF6D00')))
-    fig1.update_layout(title="5-Year Price & 200 MA", height=380, margin=dict(l=0, r=0, t=30, b=0), template="plotly_dark")
+    fig1.update_layout(title="Price & 200 MA", height=380, margin=dict(l=0, r=0, t=30, b=0), template="plotly_dark")
     st.plotly_chart(fig1, use_container_width=True)
 
     fig2 = go.Figure()
     fig2.add_trace(go.Scatter(x=df['date'], y=df['mvrv'], name='MVRV', line=dict(color='#00E676')))
     fig2.add_hline(y=1.0, line_dash="dash", line_color="gray", annotation_text="Fair Value (1.0)")
-    fig2.update_layout(title="5-Year MVRV Valuation Band", height=300, margin=dict(l=0, r=0, t=30, b=0), template="plotly_dark")
+    fig2.update_layout(title="MVRV Valuation Band", height=300, margin=dict(l=0, r=0, t=30, b=0), template="plotly_dark")
     st.plotly_chart(fig2, use_container_width=True)
 
 with col2:
