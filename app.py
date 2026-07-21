@@ -13,7 +13,8 @@ def get_data():
         "assets": "btc",
         "metrics": "PriceUSD,CapMVRVCur",
         "frequency": "1d",
-        "limit_per_asset": 365
+        "limit_per_asset": 365,
+        "page_size": 365
     }
     res = requests.get(url, params=params, headers={"User-Agent": "Mozilla/5.0"}).json()
     df = pd.DataFrame(res['data'])
