@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import requests
 import plotly.graph_objects as go
-import streamlit.components.v1 as components
 
 st.set_page_config(page_title="BTC Analytics", layout="wide")
 st.title("Bitcoin Unified Analytics")
@@ -33,7 +32,6 @@ def get_mvrv():
         "frequency": "1d",
         "limit_per_asset": 365
     }
-    # Added browser header to bypass standard bot protections
     headers = {"User-Agent": "Mozilla/5.0"}
     res = requests.get(url, params=params, headers=headers).json()
     
@@ -67,6 +65,3 @@ with col1:
 with col2:
     st.subheader("Sentiment")
     st.metric(label="Fear & Greed Index", value=fng_val, delta=fng_class, delta_color="off")
-
-st.subheader("BTC Liquidation Heatmap")
-components.iframe("https://www.coinglass.com/pro/i/LiquidationHeatMap?symbol=BTC", height=800, scrolling=True)
