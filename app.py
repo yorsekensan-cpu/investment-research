@@ -188,15 +188,38 @@ for c, (name, (label, color)) in zip(cols, signals.items()):
 st.divider()
 
 # ---------------------------------------------------------------------------
+# TIMEFRAME SELECTOR — filters what's displayed, not what's computed.
+# All rolling indicators above were already computed on full history, so
+# zooming in/out here never distorts MA200/RSI/etc — it just changes the
+# viewing window on charts that follow.
+# ---------------------------------------------------------------------------
+
+timeframe = st.radio(
+    "Chart timeframe",
+    options=["1M", "3M", "6M", "1Y", "2Y", "3Y", "5Y", "All"],
+    index=3,
+    horizontal=True,
+)
+_days_map = {"1M": 30, "3M": 90, "6M": 182, "1Y": 365, "2Y": 730, "3Y": 1095, "5Y": 1825, "All": None}
+_cutoff_days = _days_map[timeframe]
+if _cutoff_days is None:
+    view_df = df
+else:
+    cutoff_date = df["date"].max() - pd.Timedelta(days=_cutoff_days)
+    view_df = df[df["date"] >= cutoff_date]
+
+st.divider()
+
+# ---------------------------------------------------------------------------
 # PRICE + PI CYCLE TOP
 # ---------------------------------------------------------------------------
 
 st.subheader("Price, 200MA & Pi Cycle Top")
 fig1 = go.Figure()
-fig1.add_trace(go.Scatter(x=df["date"], y=df["close"], name="BTC Price", line=dict(color="#2962FF")))
-fig1.add_trace(go.Scatter(x=df["date"], y=df["MA200"], name="200 DMA", line=dict(color="#FF6D00")))
-fig1.add_trace(go.Scatter(x=df["date"], y=df["MA111"], name="111 DMA", line=dict(color="#AA00FF", dash="dot")))
-fig1.add_trace(go.Scatter(x=df["date"], y=df["MA350x2"], name="350 DMA x2", line=dict(color="#D50000", dash="dot")))
+fig1.add_trace(go.Scatter(x=view_df["date"], y=view_df["close"], name="BTC Price", line=dict(color="#2962FF")))
+fig1.add_trace(go.Scatter(x=view_df["date"], y=view_df["MA200"], name="200 DMA", line=dict(color="#FF6D00")))
+fig1.add_trace(go.Scatter(x=view_df["date"], y=view_df["MA111"], name="111 DMA", line=dict(color="#AA00FF", dash="dot")))
+fig1.add_trace(go.Scatter(x=view_df["date"], y=view_df["MA350x2"], name="350 DMA x2", line=dict(color="#D50000", dash="dot")))
 fig1.update_layout(height=420, margin=dict(l=0, r=0, t=10, b=0), template="plotly_dark", yaxis_type="log")
 st.plotly_chart(fig1, use_container_width=True)
 with st.expander("What is Pi Cycle Top / how to read this chart"):
@@ -213,7 +236,7 @@ c1, c2 = st.columns(2)
 with c1:
     st.subheader("% vs 200-Day MA")
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["date"], y=df["pct_vs_200ma"], name="% vs 200DMA", line=dict(color="#00E676")))
+    fig.add_trace(go.Scatter(x=view_df["date"], y=view_df["pct_vs_200ma"], name="% vs 200DMA", line=dict(color="#00E676")))
     fig.add_hline(y=100, line_dash="dash", line_color="red", annotation_text="Stretched high (+100%)")
     fig.add_hline(y=-15, line_dash="dash", line_color="green", annotation_text="Stretched low (-15%)")
     fig.update_layout(height=320, margin=dict(l=0, r=0, t=10, b=0), template="plotly_dark")
@@ -224,7 +247,7 @@ with c1:
 with c2:
     st.subheader("Puell Multiple")
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["date"], y=df["puell"], name="Puell Multiple", line=dict(color="#FFD600")))
+    fig.add_trace(go.Scatter(x=view_df["date"], y=view_df["puell"], name="Puell Multiple", line=dict(color="#FFD600")))
     fig.add_hline(y=4, line_dash="dash", line_color="red", annotation_text="Miner euphoria (4)")
     fig.add_hline(y=0.5, line_dash="dash", line_color="green", annotation_text="Miner capitulation (0.5)")
     fig.update_layout(height=320, margin=dict(l=0, r=0, t=10, b=0), template="plotly_dark")
@@ -243,7 +266,7 @@ c5, c6 = st.columns(2)
 with c5:
     st.subheader("RSI (14)")
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["date"], y=df["RSI14"], name="RSI 14", line=dict(color="#FF6D00")))
+    fig.add_trace(go.Scatter(x=view_df["date"], y=view_df["RSI14"], name="RSI 14", line=dict(color="#FF6D00")))
     fig.add_hline(y=70, line_dash="dash", line_color="red", annotation_text="Overbought (70)")
     fig.add_hline(y=30, line_dash="dash", line_color="green", annotation_text="Oversold (30)")
     fig.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=0), template="plotly_dark")
@@ -254,7 +277,7 @@ with c5:
 with c6:
     st.subheader("Bollinger %B")
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["date"], y=df["BB_pctB"], name="%B", line=dict(color="#AA00FF")))
+    fig.add_trace(go.Scatter(x=view_df["date"], y=view_df["BB_pctB"], name="%B", line=dict(color="#AA00FF")))
     fig.add_hline(y=1, line_dash="dash", line_color="red", annotation_text="Upper band (1)")
     fig.add_hline(y=0, line_dash="dash", line_color="green", annotation_text="Lower band (0)")
     fig.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=0), template="plotly_dark")
