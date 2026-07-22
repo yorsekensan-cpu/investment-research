@@ -50,3 +50,4 @@ if __name__ == "__main__":
         print("Alert triggered and sent via Telegram.")
     else:
         print("Market status unchanged. No alerts triggered today.")
+        send_telegram_msg("🚀 *System Online!* Your market alert pipeline is active.")
